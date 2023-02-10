@@ -117,6 +117,8 @@ export const m = {
   Admin_Helper: 'Admin Helper',
   StartAt: 'StartAt',
   EndAt: 'EndAt',
+  Length: 'Length',
+  Start: 'Start',
   ContestType: 'ContestType',
   Creator: 'Creator',
   Public: 'Public',

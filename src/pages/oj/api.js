@@ -268,6 +268,16 @@ export default {
     return ajax('admin/contest/acm_helper', 'put', {
       data
     })
+  },
+  joinContest (data) {
+    return ajax('join_contest', 'post', {
+      data
+    })
+  },
+  getUserEndTime (data) {
+    return ajax('get_user_end_time', 'post', {
+      data
+    })
   }
 }
 

@@ -94,6 +94,7 @@ export const m = {
   ContestDescription: '描述',
   Contest_Start_Time: '開始時間',
   Contest_End_Time: '結束時間',
+  Contest_Length: '比賽時長',
   Contest_Password: '密碼',
   Contest_Rule_Type: '規則',
   Real_Time_Rank: '即時排名',

@@ -32,6 +32,10 @@
           label="Title">
         </el-table-column>
         <el-table-column
+          prop="length"
+          label="Duration">
+        </el-table-column>
+        <el-table-column
           label="Rule Type"
           width="130">
           <template slot-scope="scope">

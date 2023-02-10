@@ -18,8 +18,6 @@
                 </Dropdown-menu>
               </Dropdown>
             </li>
-
-
             <li>
               <i-switch size="large" v-model="formFilter.myself" @on-change="handleQueryChange">
                 <span slot="open">{{$t('m.Mine')}}</span>
@@ -71,35 +69,27 @@
             }
           },
           {
-            title: this.$i18n.t('m.ID'),
+            title: this.$i18n.t('m.Status'),
             align: 'center',
             render: (h, params) => {
               if (params.row.show_link) {
-                return h('span', {
-                  style: {
-                    color: '#57a3f3',
-                    cursor: 'pointer'
+                return h('Tag', {
+                  props: {
+                    color: JUDGE_STATUS[params.row.result].color
                   },
-                  on: {
+                  nativeOn: {
                     click: () => {
                       this.$router.push('/status/' + params.row.id)
                     }
                   }
-                }, params.row.id.slice(0, 12))
+                }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
               } else {
-                return h('span', params.row.id.slice(0, 12))
+                return h('Tag', {
+                  props: {
+                    color: JUDGE_STATUS[params.row.result].color
+                  }
+                }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
               }
-            }
-          },
-          {
-            title: this.$i18n.t('m.Status'),
-            align: 'center',
-            render: (h, params) => {
-              return h('Tag', {
-                props: {
-                  color: JUDGE_STATUS[params.row.result].color
-                }
-              }, this.$i18n.t('m.' + JUDGE_STATUS[params.row.result].name.replace(/ /g, '_')))
             }
           },
           {
@@ -114,14 +104,15 @@
                   },
                   on: {
                     click: () => {
+                      window.console.log('click', params.row.problem)
                       if (this.contestID) {
                         this.$router.push(
                           {
                             name: 'contest-problem-details',
-                            params: {problemID: params.row.problem, contestID: this.contestID}
+                            params: {problemID: params.row.problem.split(' ')[0], contestID: this.contestID}
                           })
                       } else {
-                        this.$router.push({name: 'problem-details', params: {problemID: params.row.problem}})
+                        this.$router.push({name: 'problem-details', params: {problemID: params.row.problem.split(' ')[0]}})
                       }
                     }
                   }
@@ -173,7 +164,7 @@
         loadingTable: false,
         submissions: [],
         total: 30,
-        limit: 12,
+        limit: 50,
         page: 1,
         contestID: '',
         problemID: '',

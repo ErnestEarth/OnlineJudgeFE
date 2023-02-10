@@ -159,7 +159,7 @@
           }
         ],
         problemList: [],
-        limit: 20,
+        limit: 50,
         total: 0,
         loadings: {
           table: true,
@@ -171,7 +171,7 @@
           difficulty: '',
           tag: '',
           page: 1,
-          limit: 10
+          limit: 50
         }
       }
     },
@@ -189,7 +189,7 @@
         if (this.query.page < 1) {
           this.query.page = 1
         }
-        this.query.limit = parseInt(query.limit) || 10
+        this.query.limit = parseInt(query.limit) || 50
         if (!simulate) {
           this.getTagList()
         }

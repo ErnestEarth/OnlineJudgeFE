@@ -117,6 +117,8 @@ export const m = {
   Admin_Helper: '管理員助手',
   StartAt: '開始時間',
   EndAt: '結束時間',
+  Length: '比賽時長',
+  Start: '開始比賽',
   ContestType: '比賽類型',
   Creator: '發起人',
   Public: '公開',

@@ -32,6 +32,11 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
+            <el-form-item :label="$t('m.Contest_Length')" required>
+              <el-input v-model="contest.length" :placeholder="$t('m.Contest_Length')"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item :label="$t('m.Contest_Password')">
               <el-input v-model="contest.password" :placeholder="$t('m.Contest_Password')"></el-input>
             </el-form-item>
@@ -100,7 +105,8 @@
           description: '',
           start_time: '',
           end_time: '',
-          rule_type: 'ACM',
+          length: '',
+          rule_type: 'OI',
           password: '',
           real_time_rank: true,
           visible: true,
@@ -139,7 +145,7 @@
     mounted () {
       if (this.$route.name === 'edit-contest') {
         this.title = 'Edit Contest'
-        this.disableRuleType = true
+        // this.disableRuleType = true
         api.getContest(this.$route.params.contestId).then(res => {
           let data = res.data.data
           let ranges = []

@@ -103,6 +103,7 @@ export const m = {
   ContestDescription: 'Description',
   Contest_Start_Time: 'Start Time',
   Contest_End_Time: 'End Time',
+  Contest_Length: 'Length',
   Contest_Password: 'Password',
   Contest_Rule_Type: 'Contest Rule Type',
   Real_Time_Rank: 'Real Time Rank',

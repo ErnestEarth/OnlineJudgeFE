@@ -132,7 +132,7 @@
     },
     data () {
       return {
-        pageSize: 10,
+        pageSize: 30,
         total: 0,
         problemList: [],
         keyword: '',

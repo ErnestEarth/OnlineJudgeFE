@@ -1,9 +1,41 @@
 <template>
   <div class="flex-container">
-    <div id="problem-main">
+    <div id="problem-main" :style='styleHeight'>
+      <Panel :padding="20" shadow>
+        <div slot="title">{{problem._id}} {{problem.title}}
+          <Button v-if="!this.contestID || OIContestRealTimePermission" @click="handleRoute(submissionRoute)"
+            class="fl-left" icon="navicon-round" style="margin-right: 10px;">{{$t('m.Submissions')}}</Button>
+        </div>
+        <div id="info">
+          <ul>
+            <li>
+              <p>{{$t('m.Time_Limit')}}</p>
+              <p>{{$t('m.Memory_Limit')}}</p>
+              <p>{{$t('m.IOMode')}}</p>
+              <p>{{$t('m.Level')}}</p>
+              <p v-if="problem.source">{{$t('m.Source')}}</p>
+              <p>{{$t('m.Tags')}}</p>
+            </li>
+            <li>
+              <p>{{problem.time_limit}} MS</p>
+              <p>{{problem.memory_limit}} MB</p>
+              <p>{{problem.io_mode.io_mode}}</p>
+              <p>{{$t('m.' + problem.difficulty)}}</p>
+              <p v-if="problem.source">{{problem.source}}</p>
+              <p>
+                <Poptip trigger="hover" placement="left-end">
+                  <a>{{$t('m.Show')}}</a>
+                  <div slot="content">
+                    <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
+                  </div>
+                </Poptip>
+              </p>
+            </li>
+          </ul>
+        </div>
+      </Panel>
       <!--problem main-->
-      <Panel :padding="40" shadow>
-        <div slot="title">{{problem.title}}</div>
+      <Panel :padding="20" shadow>
         <div id="problem-content" class="markdown-body" v-katex>
           <p class="title">{{$t('m.Description')}}</p>
           <p class="content" v-html=problem.description></p>
@@ -19,9 +51,9 @@
               <div class="sample-input">
                 <p class="title">{{$t('m.Sample_Input')}} {{index + 1}}
                   <a class="copy"
-                     v-clipboard:copy="sample.input"
-                     v-clipboard:success="onCopy"
-                     v-clipboard:error="onCopyError">
+                    v-clipboard:copy="sample.input"
+                    v-clipboard:success="onCopy"
+                    v-clipboard:error="onCopyError">
                     <Icon type="clipboard"></Icon>
                   </a>
                 </p>
@@ -36,20 +68,18 @@
 
           <div v-if="problem.hint">
             <p class="title">{{$t('m.Hint')}}</p>
-            <Card dis-hover>
-              <div class="content" v-html=problem.hint></div>
-            </Card>
-          </div>
-
-          <div v-if="problem.source">
-            <p class="title">{{$t('m.Source')}}</p>
-            <p class="content">{{problem.source}}</p>
+            <!-- <Card dis-hover> -->
+            <p class="content" v-html=problem.hint></p>
+            <!-- </Card> -->
           </div>
 
         </div>
       </Panel>
       <!--problem main end-->
-      <Card :padding="20" id="submit-code" dis-hover>
+    </div>
+
+    <div id="submit-code" :style='styleHeight'>
+      <Card :padding="20" dis-hover>
         <CodeMirror :value.sync="code"
                     :languages="problem.languages"
                     :language="language"
@@ -90,18 +120,19 @@
                 <Input v-model="captchaCode" class="captcha-code"/>
               </div>
             </template>
-            <Button type="warning" icon="edit" :loading="submitting" @click="submitCode"
-                    :disabled="problemSubmitDisabled || submitted"
-                    class="fl-right">
-              <span v-if="submitting">{{$t('m.Submitting')}}</span>
-              <span v-else>{{$t('m.Submit')}}</span>
-            </Button>
+            <div>
+              <Button type="warning" icon="edit" :loading="submitting" @click="submitCode"
+                      :disabled="problemSubmitDisabled || submitted"
+                      class="fl-left">
+                <span v-if="submitting">{{$t('m.Submitting')}}</span>
+                <span v-else>{{$t('m.Submit')}}</span>
+              </Button>
+            </div>
           </Col>
         </Row>
       </Card>
     </div>
-
-    <div id="right-column">
+    <!-- <div id="right-column">
       <VerticalMenu @on-click="handleRoute">
         <template v-if="this.contestID">
           <VerticalMenu-item :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
@@ -133,49 +164,6 @@
         </template>
       </VerticalMenu>
 
-      <Card id="info">
-        <div slot="title" class="header">
-          <Icon type="information-circled"></Icon>
-          <span class="card-title">{{$t('m.Information')}}</span>
-        </div>
-        <ul>
-          <li><p>ID</p>
-            <p>{{problem._id}}</p></li>
-          <li>
-            <p>{{$t('m.Time_Limit')}}</p>
-            <p>{{problem.time_limit}}MS</p></li>
-          <li>
-            <p>{{$t('m.Memory_Limit')}}</p>
-            <p>{{problem.memory_limit}}MB</p></li>
-          <li>
-          <li>
-            <p>{{$t('m.IOMode')}}</p>
-            <p>{{problem.io_mode.io_mode}}</p>
-          </li>
-          <li>
-            <p>{{$t('m.Created')}}</p>
-            <p>{{problem.created_by.username}}</p></li>
-          <li v-if="problem.difficulty">
-            <p>{{$t('m.Level')}}</p>
-            <p>{{$t('m.' + problem.difficulty)}}</p></li>
-          <li v-if="problem.total_score">
-            <p>{{$t('m.Score')}}</p>
-            <p>{{problem.total_score}}</p>
-          </li>
-          <li>
-            <p>{{$t('m.Tags')}}</p>
-            <p>
-              <Poptip trigger="hover" placement="left-end">
-                <a>{{$t('m.Show')}}</a>
-                <div slot="content">
-                  <Tag v-for="tag in problem.tags" :key="tag">{{tag}}</Tag>
-                </div>
-              </Poptip>
-            </p>
-          </li>
-        </ul>
-      </Card>
-
       <Card id="pieChart" :padding="0" v-if="!this.contestID || OIContestRealTimePermission">
         <div slot="title">
           <Icon type="ios-analytics"></Icon>
@@ -195,7 +183,7 @@
       <div slot="footer">
         <Button type="ghost" @click="graphVisible=false">{{$t('m.Close')}}</Button>
       </div>
-    </Modal>
+    </Modal> -->
   </div>
 </template>
 
@@ -256,7 +244,9 @@
         largePieInitOpts: {
           width: '500',
           height: '480'
-        }
+        },
+        allHeightData: 0,
+        styleHeight: ''
       }
     },
     beforeRouteEnter (to, from, next) {
@@ -274,6 +264,32 @@
     mounted () {
       this.$store.commit(types.CHANGE_CONTEST_ITEM_VISIBLE, {menu: false})
       this.init()
+      this.calcHeight()
+      window.addEventListener('resize', () => {
+        this.calcHeight()
+      })
+    },
+    props: {
+      value: {
+        type: Number,
+        default: 0
+      },
+      noStyle: {
+        type: Boolean,
+        default: false
+      },
+      allHeight: {
+        type: Number,
+        default: 0
+      },
+      precent: {
+        type: Number,
+        default: 100
+      },
+      diffHeight: {
+        type: Number,
+        default: 0
+      }
     },
     methods: {
       ...mapActions(['changeDomTitle']),
@@ -300,7 +316,11 @@
             return
           }
           // try to load problem template
-          this.language = this.problem.languages[0]
+          if (this.problem.languages.find('C++') === true) {
+            this.language = 'C++'
+          } else {
+            this.language = this.problem.languages[0]
+          }
           let template = this.problem.template
           if (template && template[this.language]) {
             this.code = template[this.language]
@@ -467,6 +487,21 @@
       },
       onCopyError (e) {
         this.$error('Failed to copy code')
+      },
+      calcHeight () {
+        let retHeight
+        if (this.allHeight === 0) {
+          this.allHeightData = document.documentElement.clientHeight - 150
+        } else {
+          this.allHeightData = this.allHeight
+        }
+
+        retHeight = (this.allHeightData * this.precent / 100) - this.diffHeight
+        this.$emit('input', retHeight)
+
+        if (!this.noStyle) {
+          this.styleHeight = 'height: ' + retHeight + 'px; overflow-y:auto;'
+        }
       }
     },
     computed: {
@@ -512,19 +547,21 @@
 </script>
 
 <style lang="less" scoped>
-  .card-title {
-    margin-left: 8px;
-  }
-
+  // .card-title {
+  //   margin-left: 8px;
+  // }
   .flex-container {
     #problem-main {
       flex: auto;
       margin-right: 18px;
+      width: 50%;
+      overflow: hidden;
+      overflow-y: scroll;
     }
-    #right-column {
-      flex: none;
-      width: 220px;
-    }
+    // #right-column {
+    //   flex: auto;
+    //   width: 220px;
+    // }
   }
 
   #problem-content {
@@ -550,7 +587,7 @@
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        margin-right: 5%;
+        margin-right: 20px;
       }
       pre {
         flex: 1 1 auto;
@@ -562,8 +599,8 @@
   }
 
   #submit-code {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    flex: auto;
+    width: 50%;
     .status {
       float: left;
       span {
@@ -582,27 +619,24 @@
   }
 
   #info {
-    margin-bottom: 20px;
-    margin-top: 20px;
     ul {
       list-style-type: none;
       li {
-        border-bottom: 1px dotted #e9eaec;
-        margin-bottom: 10px;
+        margin-bottom: 1px;
         p {
           display: inline-block;
-        }
-        p:first-child {
+          border-right: 1px dotted #e9eaec;
           width: 90px;
+          text-align: center;
         }
         p:last-child {
-          float: right;
+          border-right: none;
         }
       }
     }
   }
 
-  .fl-right {
+  .fl-left {
     float: right;
   }
 

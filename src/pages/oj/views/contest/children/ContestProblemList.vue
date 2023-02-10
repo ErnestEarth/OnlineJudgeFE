@@ -2,16 +2,18 @@
   <div>
     <Panel>
       <div slot="title">{{$t('m.Problems_List')}}</div>
-      <Table v-if="contestRuleType == 'ACM' || OIContestRealTimePermission"
-             :columns="ACMTableColumns"
-             :data="problems"
-             @on-row-click="goContestProblem"
-             :no-data-text="$t('m.No_Problems')"></Table>
-      <Table v-else
-             :data="problems"
-             :columns="OITableColumns"
-             @on-row-click="goContestProblem"
-             no-data-text="$t('m.No_Problems')"></Table>
+      <div v-if="(allowence || isAdminRole) && contestStatus == 0">
+        <Table v-if="contestRuleType == 'ACM' || OIContestRealTimePermission"
+              :columns="ACMTableColumns"
+              :data="problems"
+              @on-row-click="goContestProblem"
+              :no-data-text="$t('m.No_Problems')"></Table>
+        <Table v-else
+              :data="problems"
+              :columns="OITableColumns"
+              @on-row-click="goContestProblem"
+              no-data-text="$t('m.No_Problems')"></Table>
+        </div>
     </Panel>
   </div>
 </template>
@@ -19,12 +21,14 @@
 <script>
   import {mapState, mapGetters} from 'vuex'
   import {ProblemMixin} from '@oj/components/mixins'
+  import api from '@oj/api'
 
   export default {
     name: 'ContestProblemList',
     mixins: [ProblemMixin],
     data () {
       return {
+        allowence: 1,
         ACMTableColumns: [
           {
             title: '#',
@@ -61,6 +65,14 @@
       }
     },
     mounted () {
+      let data = {
+        contest_id: this.$route.params.contestID
+      }
+      api.getUserEndTime(data).then(res => {
+        if (res.data.data.joined === 0 && this.contestStatus !== '-1') {
+          this.allowence = 0
+        }
+      })
       this.getContestProblems()
     },
     methods: {
@@ -89,7 +101,9 @@
       ...mapState({
         problems: state => state.contest.contestProblems
       }),
-      ...mapGetters(['isAuthenticated', 'contestRuleType', 'OIContestRealTimePermission'])
+      ...mapGetters(
+        ['isAuthenticated', 'contestRuleType', 'OIContestRealTimePermission',
+          'contestStatus', 'isAdminRole'])
     }
   }
 </script>

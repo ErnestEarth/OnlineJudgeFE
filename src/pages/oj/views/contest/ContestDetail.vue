@@ -18,6 +18,10 @@
                   <span id="countdown">{{countdown}}</span>
                 </Tag>
               </div>
+              <Button id="start" @click="startContest" :disabled="contestMenuDisabled">
+                {{ $t('m.Start') }}
+              </Button>
+              <div style="font-size: 20px; font-weight: bolder; margin-bottom: 20px;">注意：选手可以在比赛开放期间的任意时间段内参加比赛。点击【开始答题】按钮，即开始比赛计时，退出比赛页面或关闭网页都不会暂停计时，计时结束将无法提交，请合理安排比赛时间，不要中途离开。</div>
               <div v-html="contest.description" class="markdown-body"></div>
               <div v-if="passwordFormVisible" class="contest-password">
                 <Input v-model="contestPassword" type="password"
@@ -45,13 +49,14 @@
           {{$t('m.Announcements')}}
         </VerticalMenu-item>
 
-        <VerticalMenu-item :disabled="contestMenuDisabled"
+        <VerticalMenu-item v-if="allowence==1 || isAdminRole"
+                           :disabled="contestMenuDisabled"
                            :route="{name: 'contest-problem-list', params: {contestID: contestID}}">
           <Icon type="ios-photos"></Icon>
           {{$t('m.Problems')}}
         </VerticalMenu-item>
 
-        <VerticalMenu-item v-if="OIContestRealTimePermission"
+        <VerticalMenu-item v-if="OIContestRealTimePermission && allowence==1 || isAdminRole"
                            :disabled="contestMenuDisabled"
                            :route="{name: 'contest-submission-list'}">
           <Icon type="navicon-round"></Icon>
@@ -93,6 +98,8 @@
         btnLoading: false,
         contestID: '',
         contestPassword: '',
+        contestInfo: '',
+        allowence: 1,
         columns: [
           {
             title: this.$i18n.t('m.StartAt'),
@@ -104,6 +111,12 @@
             title: this.$i18n.t('m.EndAt'),
             render: (h, params) => {
               return h('span', time.utcToLocal(params.row.end_time))
+            }
+          },
+          {
+            title: this.$i18n.t('m.Length'),
+            render: (h, params) => {
+              return h('span', params.row.length)
             }
           },
           {
@@ -132,9 +145,23 @@
       this.route_name = this.$route.name
       this.$store.dispatch('getContest').then(res => {
         this.changeDomTitle({title: res.data.data.title})
-        let data = res.data.data
-        let endTime = moment(data.end_time)
-        if (endTime.isAfter(moment(data.now))) {
+        this.contestInfo = res.data.data
+        // 设置 countdown
+        this.contest.end_time = moment(this.contestInfo.end_time)
+        let data = {
+          contest_id: this.contestID
+        }
+        api.getUserEndTime(data).then(res => {
+          if (res.data.data.joined === 0 && this.contestStatus !== '-1') {
+            this.allowence = 0
+          } else if (this.contest.end_time.isAfter(moment(res.data.data.user_end_time))) {
+            this.contest.end_time = moment(res.data.data.user_end_time)
+            if (moment(this.contestInfo.now).isAfter(moment(res.data.data.user_end_time))) {
+              this.allowence = 0
+            }
+          }
+        })
+        if (this.contest.end_time.isAfter(moment(this.contestInfo.now))) {
           this.timer = setInterval(() => {
             this.$store.commit(types.NOW_ADD_1S)
           }, 1000)
@@ -159,6 +186,18 @@
         }, (res) => {
           this.btnLoading = false
         })
+      },
+      startContest () {
+        let data = {
+          contest_id: this.contestID,
+          user_start_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+          user_end_time: moment().add(this.contestInfo.length, 'minutes').format('YYYY-MM-DD HH:mm:ss')
+        }
+        this.user = data
+        api.joinContest(data).then(res => {
+          this.handleRoute(this.contestID + '/problems')
+        }).catch(() => {
+        })
       }
     },
     computed: {
@@ -170,7 +209,7 @@
       }),
       ...mapGetters(
         ['contestMenuDisabled', 'contestRuleType', 'contestStatus', 'countdown', 'isContestAdmin',
-          'OIContestRealTimePermission', 'passwordFormVisible']
+          'OIContestRealTimePermission', 'passwordFormVisible', 'isAdminRole']
       ),
       countdownColor () {
         if (this.contestStatus) {
@@ -202,6 +241,15 @@
 
   #countdown {
     font-size: 16px;
+  }
+
+  #start {
+    margin-left: 10px;
+    margin-bottom: 20px;
+    height: 36px;
+    width: 100px;
+    text-align: center;
+    font-size: large;
   }
 
   .flex-container {
